@@ -53,6 +53,9 @@ protected:
 
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _PorousFlow_name_UO;
+  
+  /// Number of variables
+  const unsigned _num_var;
 
   /// permeability
   MaterialProperty<RealTensorValue> & _permeability;

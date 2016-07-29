@@ -43,8 +43,9 @@ PorousFlowMaterialPermeabilityFromPorosity::PorousFlowMaterialPermeabilityFromPo
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _poroperm_function(getParam<MooseEnum>("poroperm_function")),
     _PorousFlow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _num_var(_PorousFlow_name_UO.numVariables()),
     _permeability(declareProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _dpermeability_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_dvar"))
+    _dpermeability_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar"))
 {
   switch (_poroperm_function)
   {
@@ -73,8 +74,9 @@ PorousFlowMaterialPermeabilityFromPorosity::computeQpProperties()
 {
   _permeability[_qp] = _k_anisotropy*_mult*pow(_porosity_qp[_qp],_n)/pow(1.0-_porosity_qp[_qp],_m);
 
-  const unsigned int num_var = _PorousFlow_name_UO.numVariables();
-  // ************ Need to fix this, the derivatives won't be zero!!!!
-  _dpermeability_dvar[_qp].resize(num_var, RealTensorValue());
+  _dpermeability_dvar[_qp].resize(_num_var, RealTensorValue());
+  // This is dperm/dphi, Need to multiply by dphi/dvar
+  for (unsigned v = 0; v < _num_var; ++v)
+    _dpermeability_dvar[_qp][v] = _permeability[_qp] * (_n/_porosity_qp + _m/(1.0-_porosity_qp));
 }
 
