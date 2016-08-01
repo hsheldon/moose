@@ -5,10 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "PorousFlowMaterialPermeabilityFromPorosity.h"
+#include "PorousFlowMaterialPermeabilityKozenyCarman.h"
 
 template<>
-InputParameters validParams<PorousFlowMaterialPermeabilityFromPorosity>()
+InputParameters validParams<PorousFlowMaterialPermeabilityKozenyCarman>()
 {
   InputParameters params = validParams<Material>();
 
@@ -22,24 +22,19 @@ InputParameters validParams<PorousFlowMaterialPermeabilityFromPorosity>()
   params.addRequiredParam<Real>("n", "Porosity exponent (numerator)");
   params.addRequiredParam<Real>("m", "(1-porosity) exponent (denominator)");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
-  params.addClassDescription("This Material calculates the permeability tensor from a specified function of porosity");
+  params.addClassDescription("This Material calculates the permeability tensor from a form of the Kozeny-Carman equation");
   return params;
 }
 
-PorousFlowMaterialPermeabilityFromPorosity::PorousFlowMaterialPermeabilityFromPorosity(const InputParameters & parameters) :
+PorousFlowMaterialPermeabilityKozenyCarman::PorousFlowMaterialPermeabilityKozenyCarman(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
-    _k0_set( parameters.isParamValid("k0") ),
-    _phi0_set( parameters.isParamValid("phi0") ),
-    _f_set( parameters.isParamValid("f") ),
-    _d_set( parameters.isParamValid("d") ),
-    _k_anisotropy_set( parameters.isParamValid("k_anisotropy") ),
-    _k0( _k0_set ? getParam<Real>("k0") : -1 ),
-    _phi0( _phi0_set ? getParam<Real>("phi0") : -1 ),
-    _f( _f_set ? getParam<Real>("f") : -1 ),
-    _d( _d_set ? getParam<Real>("d") : -1 ),
+    _k0( parameters.isParamValid("k0") ? getParam<Real>("k0") : -1 ),
+    _phi0( parameters.isParamValid("phi0") ? getParam<Real>("phi0") : -1 ),
+    _f( parameters.isParamValid("f") ? getParam<Real>("f") : -1 ),
+    _d( parameters.isParamValid("d") ? getParam<Real>("d") : -1 ),
     _m(getParam<Real>("m")),
     _n(getParam<Real>("n")),
-    _k_anisotropy( _k_anisotropy_set ? getParam<RealTensorValue>("k_anisotropy") : getParam<RealTensorValue>("1 0 0  0 1 0  0 0 1")),
+    _k_anisotropy( parameters.isParamValid("k_anisotropy") ? getParam<RealTensorValue>("k_anisotropy") : getParam<RealTensorValue>("1 0 0  0 1 0  0 0 1")),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _dporosity_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
     _poroperm_function(getParam<MooseEnum>("poroperm_function")),
@@ -51,32 +46,25 @@ PorousFlowMaterialPermeabilityFromPorosity::PorousFlowMaterialPermeabilityFromPo
   switch (_poroperm_function)
   {
     case 0: // kozeny_carman_fd2
-      if (!(_f_set && _d_set))
-        mooseError("You must specify f and d in order to use kozeny_carman_fd2 in PorousFlowMaterialPermeabilityFromPorosity");
-      _mult = _f*_d*_d;
+      if (!(parameters.isParamValid("f") && parameters.isParamValid("d")))
+        mooseError("You must specify f and d in order to use kozeny_carman_fd2 in PorousFlowMaterialPermeabilityKozenyCarman");
+      _A = _f * _d * _d;
       break;
     case 1: // kozeny_carman_phi0
-      if (!(_k0_set && _phi0_set))
-        mooseError("You must specify k0 and phi0 in order to use kozeny_carman_phi0 in PorousFlowMaterialPermeabilityFromPorosity");
-      _mult = _k0*pow(1.0-_phi0,_m)/pow(_phi0,_n);
+      if (!(parameters.isParamValid("k0") && parameters.isParamValid("phi0")))
+        mooseError("You must specify k0 and phi0 in order to use kozeny_carman_phi0 in PorousFlowMaterialPermeabilityKozenyCarman");
+      _A = _k0 * std::pow(1.0 - _phi0,_m)/std::pow(_phi0,_n);
       break;
   }
 }
 
 void
-PorousFlowMaterialPermeabilityFromPorosity::initQpStatefulProperties()
+PorousFlowMaterialPermeabilityKozenyCarman::computeQpProperties()
 {
-  // **********  Not sure if this is the right thing or even possible! If not need to figure out an alternative for initialising perm.
-  _permeability[_qp] = _k_anisotropy*_mult*pow(_porosity_qp[_qp],_n)/pow(1.0-_porosity_qp[_qp],_m);
-}
-
-void
-PorousFlowMaterialPermeabilityFromPorosity::computeQpProperties()
-{
-  _permeability[_qp] = _k_anisotropy*_mult*pow(_porosity_qp[_qp],_n)/pow(1.0-_porosity_qp[_qp],_m);
+  _permeability[_qp] = _k_anisotropy * _A * std::pow(_porosity_qp[_qp],_n)/std::pow(1.0 - _porosity_qp[_qp],_m);
 
   _dpermeability_dvar[_qp].resize(_num_var, RealTensorValue());
   for (unsigned v = 0; v < _num_var; ++v)
-    _dpermeability_dvar[_qp][v] = _dporosity_qp_dvar[_qp][v]*_permeability[_qp] * (_n/_porosity_qp[_qp] + _m/(1.0-_porosity_qp[_qp]));
+    _dpermeability_dvar[_qp][v] = _dporosity_qp_dvar[_qp][v] * _permeability[_qp] * (_n / _porosity_qp[_qp] + _m / (1.0 - _porosity_qp[_qp]));
 }
 

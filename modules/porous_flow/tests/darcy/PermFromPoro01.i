@@ -183,7 +183,7 @@
   
   # Permeability
   [./permeability]
-    type = PorousFlowMaterialPermeabilityFromPorosity
+    type = PorousFlowMaterialPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
     poroperm_function = kozeny_carman_fd2
     f = 0.1

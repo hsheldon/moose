@@ -1,0 +1,32 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+#include "PorousFlowMaterialPermeabilityUnity.h"
+
+template<>
+InputParameters validParams<PorousFlowMaterialPermeabilityUnity>()
+{
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  params.addClassDescription("This Material calculates the permeability tensor assuming it is equal to 1 0 0  0 1 0  0 0 1");
+  return params;
+}
+
+PorousFlowMaterialPermeabilityUnity::PorousFlowMaterialPermeabilityUnity(const InputParameters & parameters) :
+    PorousFlowMaterialVectorBase(parameters),
+    _PorousFlow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _num_var(_PorousFlow_name_UO.numVariables()),
+    _permeability_qp(declareProperty<Real>("PorousFlow_permeability_qp")),
+    _dpermeability_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_permeability_qp_dvar")),
+{
+}
+
+void
+PorousFlowMaterialPermeabilityUnity::computeQpProperties()
+{
+  _dpermeability_dvar[_qp].resize(_num_var, RealTensorValue());
+  _permeability_qp[_qp] = getParam<RealTensorValue>("1 0 0  0 1 0  0 0 1");
+}
