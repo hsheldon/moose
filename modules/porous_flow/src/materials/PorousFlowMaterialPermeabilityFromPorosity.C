@@ -13,9 +13,9 @@ InputParameters validParams<PorousFlowMaterialPermeabilityFromPorosity>()
   InputParameters params = validParams<Material>();
 
   MooseEnum poroperm_function("kozeny_carman_fd2=0 kozeny_carman_phi0=1", "kozeny_carman_fd2");
-  params.addParam<MooseEnum>("poroperm_function", poroperm_function, "Function relating porosity and permeability. The options are: kozeny_carman_fd2 = f d^2 phi^n/(1-phi)^m (where f is a scalar constant with typical values 0.01-0.001, and d is grain size). kozeny_carman_phi0 = k0 (1-phi0)^m/phi0^n * phi^n/(1-phi)^m (where k0 is the permeability at porosity phi0)");
+  params.addParam<MooseEnum>("poroperm_function", poroperm_function, "Function relating porosity and permeability. The options are: kozeny_carman_fd2 = f d^2 phi^n/(1-phi)^m (where phi is porosity, f is a scalar constant with typical values 0.01-0.001, and d is grain size). kozeny_carman_phi0 = k0 (1-phi0)^m/phi0^n * phi^n/(1-phi)^m (where phi is porosity, and k0 is the permeability at porosity phi0)");
   params.addParam<Real>("k0", "The permeability scalar value (usually in m^2) at the reference porosity, required for kozeny_carman_phi0");
-  params.addParam<RealTensorValue>("k_anisotropy", "A tensor to multiply the calculated scalar permeability, in order to obtain anisotropy if required");
+  params.addParam<RealTensorValue>("k_anisotropy", "A tensor to multiply the calculated scalar permeability, in order to obtain anisotropy if required. Defaults to isotropic permeability if not specified.");
   params.addParam<Real>("phi0", "The reference porosity, required for kozeny_carman_phi0");
   params.addParam<Real>("f", "The multiplying factor, required for kozeny_carman_fd2");
   params.addParam<Real>("d", "The grain diameter, required for kozeny_carman_fd2");
@@ -41,11 +41,12 @@ PorousFlowMaterialPermeabilityFromPorosity::PorousFlowMaterialPermeabilityFromPo
     _n(getParam<Real>("n")),
     _k_anisotropy( _k_anisotropy_set ? getParam<RealTensorValue>("k_anisotropy") : getParam<RealTensorValue>("1 0 0  0 1 0  0 0 1")),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
+    _dporosity_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
     _poroperm_function(getParam<MooseEnum>("poroperm_function")),
     _PorousFlow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
     _num_var(_PorousFlow_name_UO.numVariables()),
-    _permeability(declareProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _dpermeability_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar"))
+    _permeability(declareProperty<RealTensorValue>("PorousFlow_permeability")),
+    _dpermeability_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_dvar"))
 {
   switch (_poroperm_function)
   {
@@ -75,8 +76,7 @@ PorousFlowMaterialPermeabilityFromPorosity::computeQpProperties()
   _permeability[_qp] = _k_anisotropy*_mult*pow(_porosity_qp[_qp],_n)/pow(1.0-_porosity_qp[_qp],_m);
 
   _dpermeability_dvar[_qp].resize(_num_var, RealTensorValue());
-  // This is dperm/dphi, Need to multiply by dphi/dvar
   for (unsigned v = 0; v < _num_var; ++v)
-    _dpermeability_dvar[_qp][v] = _permeability[_qp] * (_n/_porosity_qp + _m/(1.0-_porosity_qp));
+    _dpermeability_dvar[_qp][v] = _dporosity_qp_dvar[_qp][v]*_permeability[_qp] * (_n/_porosity_qp[_qp] + _m/(1.0-_porosity_qp[_qp]));
 }
 

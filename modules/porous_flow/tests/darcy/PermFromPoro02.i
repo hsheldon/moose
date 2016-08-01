@@ -1,6 +1,6 @@
 # Testing permeability from porosity
 # Trivial test, checking calculated permeability is correct
-
+# k = k_anisotropic * k0 * (1-phi0)^m/phi0^n * phi^n/(1-phi)^m
 
 [Mesh]
   type = GeneratedMesh
@@ -80,21 +80,21 @@
   [../]
   [./perm_x]
     type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    property = PorousFlow_permeability
     variable = perm_x
     row = 0
     column = 0
   [../]
   [./perm_y]
     type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    property = PorousFlow_permeability
     variable = perm_y
     row = 1
     column = 1
   [../]
   [./perm_z]
     type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    property = PorousFlow_permeability
     variable = perm_z
     row = 2
     column = 2
@@ -102,6 +102,36 @@
 []
 
 [Postprocessors]
+  [./perm_x_bottom]
+    type = PointValue
+    variable = perm_x
+    point = '0 0 0'
+  [../]
+  [./perm_y_bottom]
+    type = PointValue
+    variable = perm_y
+    point = '0 0 0'
+  [../]
+  [./perm_z_bottom]
+    type = PointValue
+    variable = perm_z
+    point = '0 0 0'
+  [../]
+  [./perm_x_top]
+    type = PointValue
+    variable = perm_x
+    point = '0 0 10'
+  [../]
+  [./perm_y_top]
+    type = PointValue
+    variable = perm_y
+    point = '0 0 10'
+  [../]
+  [./perm_z_top]
+    type = PointValue
+    variable = perm_z
+    point = '0 0 10'
+  [../]
 []
 
 [UserObjects]
@@ -155,9 +185,9 @@
   [./permeability]
     type = PorousFlowMaterialPermeabilityFromPorosity
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
-    poroperm_function = kozeny_carman_fd2
-    f = 0.1
-    d = 5
+    poroperm_function = kozeny_carman_phi0
+    k0 = 1e-13
+    phi0 = 0.05
     m = 2
     n = 7
   [../]
@@ -205,8 +235,7 @@
 
 
 [Outputs]
-  file_base = TestPermFromPoro
-  exodus = true
+  file_base = PermFromPoro02
   csv = true
   execute_on = 'initial timestep_end'
 []

@@ -29,6 +29,7 @@ public:
   PorousFlowMaterialPermeabilityFromPorosity(const InputParameters & parameters);
 
 protected:
+  /// flags to indicate whether parameters have been set
   bool _k0_set;
   bool _phi0_set;
   bool _f_set;
@@ -41,13 +42,15 @@ protected:
   const Real _f;
   const Real _d;
   const Real _m;
-  const Real _n;
-  
+  const Real _n;  
   const RealTensorValue _k_anisotropy;
 
   /// quadpoint porosity
   const MaterialProperty<Real> & _porosity_qp;
   
+  /// d(quadpoint porosity)/d(PorousFlow variable)
+  const MaterialProperty<std::vector<Real> > & _dporosity_qp_dvar;
+
   /// name of porosity-permeability relationship
   const MooseEnum _poroperm_function;
 
@@ -57,10 +60,10 @@ protected:
   /// Number of variables
   const unsigned _num_var;
 
-  /// permeability
+  /// quadpoint permeability
   MaterialProperty<RealTensorValue> & _permeability;
 
-  /// d(permeability)/d(PorousFlow variable) which are all zero in this case
+  /// d(quadpoint permeability)/d(PorousFlow variable)
   MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_dvar;
 
   /// multiplying factor used in the poroperm equation
