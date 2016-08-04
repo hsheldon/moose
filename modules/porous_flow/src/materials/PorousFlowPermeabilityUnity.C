@@ -5,28 +5,28 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "PorousFlowMaterialPermeabilityUnity.h"
+#include "PorousFlowPermeabilityUnity.h"
 
 template<>
-InputParameters validParams<PorousFlowMaterialPermeabilityUnity>()
+InputParameters validParams<PorousFlowPermeabilityUnity>()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = validParams<Material>();
   params.addClassDescription("This Material calculates the permeability tensor assuming it is equal to 1 0 0  0 1 0  0 0 1");
   return params;
 }
 
-PorousFlowMaterialPermeabilityUnity::PorousFlowMaterialPermeabilityUnity(const InputParameters & parameters) :
-    PorousFlowMaterialVectorBase(parameters),
+PorousFlowPermeabilityUnity::PorousFlowPermeabilityUnity(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
     _PorousFlow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
     _num_var(_PorousFlow_name_UO.numVariables()),
-    _permeability_qp(declareProperty<Real>("PorousFlow_permeability_qp")),
-    _dpermeability_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_permeability_qp_dvar")),
+    _permeability_qp(declareProperty<RealTensorValue>("PorousFlow_permeability_qp")),
+    _dpermeability_qp_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar"))
 {
 }
 
 void
-PorousFlowMaterialPermeabilityUnity::computeQpProperties()
+PorousFlowPermeabilityUnity::computeQpProperties()
 {
-  _dpermeability_dvar[_qp].resize(_num_var, RealTensorValue());
+  _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
   _permeability_qp[_qp] = getParam<RealTensorValue>("1 0 0  0 1 0  0 0 1");
 }

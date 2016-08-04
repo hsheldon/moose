@@ -80,21 +80,21 @@
   [../]
   [./perm_x]
     type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability
+    property = PorousFlow_permeability_qp
     variable = perm_x
     row = 0
     column = 0
   [../]
   [./perm_y]
     type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability
+    property = PorousFlow_permeability_qp
     variable = perm_y
     row = 1
     column = 1
   [../]
   [./perm_z]
     type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability
+    property = PorousFlow_permeability_qp
     variable = perm_z
     row = 2
     column = 2
@@ -183,7 +183,7 @@
   
   # Permeability
   [./permeability]
-    type = PorousFlowMaterialPermeabilityKozenyCarman
+    type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
     poroperm_function = kozeny_carman_phi0
     k0 = 1e-13

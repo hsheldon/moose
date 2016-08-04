@@ -5,19 +5,20 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef POROUSFLOWMATERIALPERMEABILITYKOZENYCARMAN_H
-#define POROUSFLOWMATERIALPERMEABILITYKOZENYCARMAN_H
+#ifndef POROUSFLOWPERMEABILITYKOZENYCARMAN_H
+#define POROUSFLOWPERMEABILITYKOZENYCARMAN_H
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
+#include "PorousFlowPermeabilityUnity.h"
 
 #include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorousFlowMaterialPermeabilityKozenyCarman;
+class PorousFlowPermeabilityKozenyCarman;
 
 template<>
-InputParameters validParams<PorousFlowMaterialPermeabilityKozenyCarman>();
+InputParameters validParams<PorousFlowPermeabilityKozenyCarman>();
 
 /**
  * Material designed to provide the permeability tensor which is calculated 
@@ -33,14 +34,14 @@ InputParameters validParams<PorousFlowMaterialPermeabilityKozenyCarman>();
  * A = f * d^2
  * where f is a scalar constant and d is grain diameter.
  */
-class PorousFlowMaterialPermeabilityKozenyCarman : public DerivativeMaterialInterface<Material>
+class PorousFlowPermeabilityKozenyCarman : public PorousFlowPermeabilityUnity
 {
 public:
-  PorousFlowMaterialPermeabilityKozenyCarman(const InputParameters & parameters);
+  PorousFlowPermeabilityKozenyCarman(const InputParameters & parameters);
 
 protected:
-  // parameters for poroperm equation
-  
+  void computeQpProperties();
+
   /// Reference scalar permeability in A = k0 * (1 - phi0)^m / phi0^n
   const Real _k0;
   
@@ -50,7 +51,7 @@ protected:
   /// Multiplying factor in A = f * d^2
   const Real _f;
   
-  /// Grain diameter A = f * d^2
+  /// Grain diameter in A = f * d^2
   const Real _d;
   
   /// Exponent in k = k_ijk * A * phi^n / (1 - phi)^m
@@ -71,22 +72,8 @@ protected:
   /// Name of porosity-permeability relationship
   const MooseEnum _poroperm_function;
 
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _PorousFlow_name_UO;
-  
-  /// Number of variables
-  const unsigned _num_var;
-
-  /// quadpoint permeability
-  MaterialProperty<RealTensorValue> & _permeability;
-
-  /// d(quadpoint permeability)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_dvar;
-
   /// Multiplying factor in k = k_ijk * A * phi^n / (1 - phi)^m
   Real _A;
-
-  virtual void computeQpProperties();
 };
 
-#endif //POROUSFLOWMATERIALPERMEABILITYKOZENYCARMAN_H
+#endif //POROUSFLOWPERMEABILITYKOZENYCARMAN_H
