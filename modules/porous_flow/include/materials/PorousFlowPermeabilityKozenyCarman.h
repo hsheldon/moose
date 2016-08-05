@@ -8,11 +8,7 @@
 #ifndef POROUSFLOWPERMEABILITYKOZENYCARMAN_H
 #define POROUSFLOWPERMEABILITYKOZENYCARMAN_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
 #include "PorousFlowPermeabilityUnity.h"
-
-#include "PorousFlowDictator.h"
 
 //Forward Declarations
 class PorousFlowPermeabilityKozenyCarman;

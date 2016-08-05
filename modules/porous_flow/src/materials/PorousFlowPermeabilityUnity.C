@@ -12,6 +12,7 @@ InputParameters validParams<PorousFlowPermeabilityUnity>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("This Material calculates the permeability tensor assuming it is equal to 1 0 0  0 1 0  0 0 1");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   return params;
 }
 

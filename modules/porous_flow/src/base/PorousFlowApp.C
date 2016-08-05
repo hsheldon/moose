@@ -24,7 +24,6 @@
 #include "PorousFlowMaterialPorosityConst.h"
 #include "PorousFlowPorosityHM.h"
 #include "PorousFlowMaterialMassFractionBuilder.h"
-#include "PorousFlowPermeabilityUnity.h"
 #include "PorousFlowPermeabilityConst.h"
 #include "PorousFlowPermeabilityKozenyCarman.h"
 #include "PorousFlowMaterialRelativePermeabilityBase.h"

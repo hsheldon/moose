@@ -10,7 +10,6 @@
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
-
 #include "PorousFlowDictator.h"
 
 //Forward Declarations

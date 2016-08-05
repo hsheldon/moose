@@ -10,18 +10,16 @@
 template<>
 InputParameters validParams<PorousFlowPermeabilityKozenyCarman>()
 {
-  InputParameters params = validParams<Material>();
-
+  InputParameters params = validParams<PorousFlowPermeabilityUnity>();
   MooseEnum poroperm_function("kozeny_carman_fd2=0 kozeny_carman_phi0=1", "kozeny_carman_fd2");
   params.addParam<MooseEnum>("poroperm_function", poroperm_function, "Function relating porosity and permeability. The options are: kozeny_carman_fd2 = f d^2 phi^n/(1-phi)^m (where phi is porosity, f is a scalar constant with typical values 0.01-0.001, and d is grain size). kozeny_carman_phi0 = k0 (1-phi0)^m/phi0^n * phi^n/(1-phi)^m (where phi is porosity, and k0 is the permeability at porosity phi0)");
-  params.addParam<Real>("k0", "The permeability scalar value (usually in m^2) at the reference porosity, required for kozeny_carman_phi0");
+  params.addRangeCheckedParam<Real>("k0", "k0 > 0", "The permeability scalar value (usually in m^2) at the reference porosity, required for kozeny_carman_phi0");
   params.addParam<RealTensorValue>("k_anisotropy", "A tensor to multiply the calculated scalar permeability, in order to obtain anisotropy if required. Defaults to isotropic permeability if not specified.");
-  params.addParam<Real>("phi0", "The reference porosity, required for kozeny_carman_phi0");
-  params.addParam<Real>("f", "The multiplying factor, required for kozeny_carman_fd2");
-  params.addParam<Real>("d", "The grain diameter, required for kozeny_carman_fd2");
-  params.addRequiredParam<Real>("n", "Porosity exponent (numerator)");
-  params.addRequiredParam<Real>("m", "(1-porosity) exponent (denominator)");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRangeCheckedParam<Real>("phi0", "phi0 > 0 & phi0 < 1", "The reference porosity, required for kozeny_carman_phi0");
+  params.addRangeCheckedParam<Real>("f", "f > 0", "The multiplying factor, required for kozeny_carman_fd2");
+  params.addRangeCheckedParam<Real>("d", "d > 0", "The grain diameter, required for kozeny_carman_fd2");
+  params.addRequiredRangeCheckedParam<Real>("n", "n >= 0", "Porosity exponent");
+  params.addRequiredRangeCheckedParam<Real>("m", "m >= 0", "(1-porosity) exponent");
   params.addClassDescription("This Material calculates the permeability tensor from a form of the Kozeny-Carman equation, k = k_ijk * A * phi^n / (1 - phi)^m, where k_ijk is a tensor providing the anisotropy, phi is porosity, n and m are positive scalar constants and A is given in one of the following forms: A = k0 * (1 - phi0)^m / phi0^n (where k0 and phi0 are a reference permeability and porosity) or A = f * d^2 (where f is a scalar constant and d is grain diameter.");
   return params;
 }

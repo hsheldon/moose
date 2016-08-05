@@ -8,11 +8,7 @@
 #ifndef POROUSFLOWPERMEABILITYCONST_H
 #define POROUSFLOWPERMEABILITYCONST_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
 #include "PorousFlowPermeabilityUnity.h"
-
-#include "PorousFlowDictator.h"
 
 //Forward Declarations
 class PorousFlowPermeabilityConst;
