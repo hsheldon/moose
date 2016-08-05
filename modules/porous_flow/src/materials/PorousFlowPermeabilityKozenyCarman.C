@@ -32,7 +32,7 @@ PorousFlowPermeabilityKozenyCarman::PorousFlowPermeabilityKozenyCarman(const Inp
     _d( parameters.isParamValid("d") ? getParam<Real>("d") : -1 ),
     _m(getParam<Real>("m")),
     _n(getParam<Real>("n")),
-    _k_anisotropy(parameters.isParamValid("k_anisotropy") ? getParam<RealTensorValue>("k_anisotropy") : getParam<RealTensorValue>("1 0 0  0 1 0  0 0 1")),
+    _k_anisotropy(parameters.isParamValid("k_anisotropy") ? getParam<RealTensorValue>("k_anisotropy") : RealTensorValue(1, 0, 0, 0, 1, 0, 0, 0, 1)),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _dporosity_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
     _poroperm_function(getParam<MooseEnum>("poroperm_function"))

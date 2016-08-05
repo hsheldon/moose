@@ -29,5 +29,5 @@ void
 PorousFlowPermeabilityUnity::computeQpProperties()
 {
   _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
-  _permeability_qp[_qp] = getParam<RealTensorValue>("1 0 0  0 1 0  0 0 1");
+  _permeability_qp[_qp] = RealTensorValue(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
