@@ -3,18 +3,21 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 20
-  ny = 40
+  dim = 3
+  nx = 40
+  ny = 1
+  nz = 20
   xmin = 0
   xmax = 2695 # width of 2 convection cells for these BCs
-  ymin = -1000
-  ymax = 0
+  ymin = 0
+  ymax = 50
+  zmin = -1000
+  zmax = 0
 []
 
 [GlobalParams]
   PorousFlowDictator = dictator
-  gravity = '0 -10 0'
+  gravity = '0 0 -10'
 []
 
 [Modules]
@@ -43,8 +46,8 @@
       #type = FunctionIC
       #function = ini_temp
       type = RandomIC
-      min = 44
-      max = 46
+      min = 45
+      max = 45.2
       #type = BoundingBoxIC
       #inside = 31
       #outside = 30
@@ -61,13 +64,13 @@
     type = ParsedFunction
     vars = 'g rho_f'
     vals = '-10 1000' # gravity, fluid density
-    value = 'g*y*rho_f'
+    value = 'g*z*rho_f'
   [../]
   [./ini_temp]
     type = ParsedFunction
     vars = 't_0 t_grad'
     vals = '30 -3e-2' # temperature at top, temperature gradient
-    value = 't_0+t_grad*y'
+    value = 't_0+t_grad*z'
   [../]
 []
 
@@ -101,13 +104,13 @@
   [./p_top]
     type = FunctionPresetBC
     variable = pp
-    boundary = top
+    boundary = front
     function = ini_pp
   [../]
   [./t_fixed]
     type = FunctionPresetBC
     variable = temp
-    boundary = 'top bottom'
+    boundary = 'front back'
     function = ini_temp
   [../]
 []
@@ -117,7 +120,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./darcy_y]
+  [./darcy_z]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -129,48 +132,48 @@
     component = 'x'
     variable = darcy_x
   [../]
-  [./darcy_y]
+  [./darcy_z]
     type = PorousFlowDarcyVelocityComponent
-    component = 'y'
-    variable = darcy_y
+    component = 'z'
+    variable = darcy_z
   [../]
 []
 
 [Postprocessors]
-  [./darcy_y_1]
-    point = '0 -500 0'
+  [./darcy_z_1]
+    point = '0 0 -500'
     type = PointValue
-    variable = darcy_y
+    variable = darcy_z
     execute_on = 'initial timestep_end'
   [../]
   [./temp_1]
-    point = '0 -500 0'
+    point = '0 0 -500'
     type = PointValue
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./darcy_y_2]
-    point = '1E3 -500 0'
+  [./darcy_z_2]
+    point = '1E3 0 -500'
     type = PointValue
-    variable = darcy_y
+    variable = darcy_z
     execute_on = 'initial timestep_end'
   [../]
   [./temp_2]
-    point = '1E3 -500 0'
+    point = '1E3 0 -500'
     type = PointValue
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./darcy_y_3]
-    point = '2E3 -500 0'
+  [./darcy_z_3]
+    point = '2E3 0 -500'
     type = PointValue
-    variable = darcy_y
+    variable = darcy_z
     execute_on = 'initial timestep_end'
   [../]
   [./temp_3]
-    point = '2E3 -500 0'
+    point = '2E3 0 -500'
     type = PointValue
     variable = temp
     execute_on = 'initial timestep_end'
@@ -333,7 +336,7 @@
   line_search = bt
 
   dt = 1E13
-  end_time = 1E14
+  end_time = 1E15
 
   l_tol = 1E-5
   nl_abs_tol = 1E-4
