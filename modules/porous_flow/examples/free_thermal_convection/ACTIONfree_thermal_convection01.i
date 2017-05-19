@@ -4,9 +4,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 80
+  nx = 20
   ny = 1
-  nz = 40
+  nz = 10
   xmin = 0
   xmax = 2000 # width of 2 convection cells for these BCs
   ymin = 0
@@ -27,7 +27,7 @@
       thermal_expansion = 2E-4
       cv = 4180
       cp = 4180
-      bulk_modulus = 2E9
+      bulk_modulus = 2E12
       density0 = 1000
       viscosity = 1E-3
     [../]
@@ -54,18 +54,6 @@
     [./InitialCondition]
       type = FunctionIC
       function = ini_temp_perturb
-      #type = RandomIC
-      #min = 44
-      #max = 46
-      #type = BoundingBoxIC
-      #inside = 35
-      #outside = 30
-      #x1 = 0
-      #x2 = 100
-      #y1 = 0
-      #y2 = 50
-      #z1 = -1000
-      #z2 = -900
     [../]
   [../]
 []
@@ -89,9 +77,6 @@
     vals = '30 -3e-2' # temperature at top, temperature gradient
     value = 't_0+t_grad*z+sin(x/10)'
   [../]
-[]
-
-[Kernels]
 []
 
 [BCs]
@@ -125,12 +110,6 @@
     pt_vals = '-1E4 60 1E4'
     variable = temp
   [../]
-[]
-
-[AuxVariables]
-[]
-
-[AuxKernels]
 []
 
 [Postprocessors]
@@ -178,32 +157,21 @@
 []
 
 [Materials]
-#  [./thermal_conductivity]
-#    type = PorousFlowThermalConductivityIdeal
-#    dry_thermal_conductivity = '3 0 0  0 3 0  0 0 3' # irrelevant in fully saturated case
-#    wet_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
-#    exponent = 1.0 # irrelevant in fully saturated case
-#    aqueous_phase_number = 0
-#  [../]
-
   [./thermal_conductivity]
     type = PorousFlowThermalConductivityFromPorosity
     lambda_s = '3 0 0  0 3 0  0 0 3'
     lambda_f = '3 0 0  0 3 0  0 0 3'
   [../]
-
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
     at_nodes = true
     specific_heat_capacity = 850
     density = 3000
   [../]
-
   [./permeability]
     type = PorousFlowPermeabilityConst
-    permeability = '4.9E-13 0 0  0 4.9E-13 0  0 0 4.9E-13'
+    permeability = '4.75E-13 0 0  0 4.75E-13 0  0 0 4.75E-13'
   [../]
-
   [./porosity_nodal]
     type = PorousFlowPorosityConst
     at_nodes = true
