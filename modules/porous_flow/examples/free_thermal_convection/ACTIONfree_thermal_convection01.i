@@ -4,9 +4,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 40
+  nx = 80
   ny = 1
-  nz = 20
+  nz = 40
   xmin = 0
   xmax = 2000 # width of 2 convection cells for these BCs
   ymin = 0
@@ -33,6 +33,15 @@
     [../]
   [../]
 []
+
+[PorousFlowFullySaturated]
+  coupling_type = ThermoHydro
+  porepressure = pp
+  temperature = temp
+  dictator_name = dictator
+  fp = simple_fluid
+[]
+
 
 [Variables]
   [./pp]
@@ -77,28 +86,6 @@
 []
 
 [Kernels]
-  active = 'mass_dot flux_no_upwind energy_dot convection_no_upwind heat_conduction'
-  [./mass_dot]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    variable = pp
-  [../]
-  [./flux_no_upwind]
-    type = PorousFlowFullySaturatedDarcyBase
-    variable = pp
-  [../]
-  [./energy_dot]
-    type = PorousFlowEnergyTimeDerivative
-    variable = temp
-  [../]
-  [./convection_no_upwind]
-    type = PorousFlowFullySaturatedHeatAdvection
-    variable = temp
-  [../]
-  [./heat_conduction]
-    type = PorousFlowHeatConduction
-    variable = temp
-  [../]
 []
 
 [BCs]
@@ -135,34 +122,16 @@
 []
 
 [AuxVariables]
-  [./darcy_x]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./darcy_z]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [AuxKernels]
-  [./darcy_x]
-    type = PorousFlowDarcyVelocityComponent
-    component = 'x'
-    variable = darcy_x
-  [../]
-  [./darcy_z]
-    type = PorousFlowDarcyVelocityComponent
-    component = 'z'
-    variable = darcy_z
-  [../]
 []
 
 [Postprocessors]
   [./darcy_z_1]
     point = '0 0 -500'
     type = PointValue
-    variable = darcy_z
+    variable = darcy_vel_z
     execute_on = 'initial timestep_end'
   [../]
   [./temp_1]
@@ -175,7 +144,7 @@
   [./darcy_z_2]
     point = '1E3 0 -500'
     type = PointValue
-    variable = darcy_z
+    variable = darcy_vel_z
     execute_on = 'initial timestep_end'
   [../]
   [./temp_2]
@@ -188,7 +157,7 @@
   [./darcy_z_3]
     point = '2E3 0 -500'
     type = PointValue
-    variable = darcy_z
+    variable = darcy_vel_z
     execute_on = 'initial timestep_end'
   [../]
   [./temp_3]
@@ -200,77 +169,21 @@
 []
 
 [UserObjects]
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'pp temp'
-    number_fluid_phases = 1
-    number_fluid_components = 1
-  [../]
 []
 
 [Materials]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-    temperature = temp
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
-    temperature = temp
-  [../]
-
-  [./massfrac_nodal]
-    type = PorousFlowMassFraction
-    at_nodes = true
-  [../]
-
-  [./simple_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-  [../]
-  [./simple_fluid_nodal]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    at_nodes = true
-    phase = 0
-  [../]
-
-  [./eff_fluid_pressure_nodal]
-    type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
-  [../]
-  [./eff_fluid_pressure_qp]
-    type = PorousFlowEffectiveFluidPressure
-  [../]
-
-  [./ppss_qp]
-    type = PorousFlow1PhaseP
-    porepressure = pp
-  [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    at_nodes = true
-    porepressure = pp
-  [../]
-
-  [./dens_all_nodal]
-    type = PorousFlowJoiner
-    at_nodes = true
-    include_old = true
-    material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
-  [./dens_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-  [../]
+#  [./thermal_conductivity]
+#    type = PorousFlowThermalConductivityIdeal
+#    dry_thermal_conductivity = '3 0 0  0 3 0  0 0 3' # irrelevant in fully saturated case
+#    wet_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
+#    exponent = 1.0 # irrelevant in fully saturated case
+#    aqueous_phase_number = 0
+#  [../]
 
   [./thermal_conductivity]
-    type = PorousFlowThermalConductivityIdeal
-    dry_thermal_conductivity = '3 0 0  0 3 0  0 0 3' # irrelevant in fully saturated case
-    wet_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
-    exponent = 1.0 # irrelevant in fully saturated case
-    aqueous_phase_number = 0
+    type = PorousFlowThermalConductivityFromPorosity
+    lambda_s = '3 0 0  0 3 0  0 0 3'
+    lambda_f = '3 0 0  0 3 0  0 0 3'
   [../]
 
   [./rock_heat]
@@ -279,56 +192,10 @@
     specific_heat_capacity = 850
     density = 3000
   [../]
-  [./internal_energy_fluids]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_internal_energy_nodal
-  [../]
-
-  [./enthalpy_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_enthalpy_qp
-  [../]
-  [./enthalpy_all_nodal]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_enthalpy_nodal
-  [../]
-
-  [./visc_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
-  [../]
-  [./visc_all_nodal]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
 
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '4.9E-13 0 0  0 4.9E-13 0  0 0 4.9E-13'
-  [../]
-
-  [./relperm_qp]
-    type = PorousFlowRelativePermeabilityCorey
-    n = 0 # unimportant in this fully-saturated situation
-    phase = 0
-  [../]
-  [./relperm_nodal]
-    type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
-    n = 0 # unimportant in this fully-saturated situation
-    phase = 0
-  [../]
-  [./relperm_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_qp
-  [../]
-  [./relperm_all_nodal]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
   [../]
 
   [./porosity_nodal]
@@ -352,10 +219,10 @@
 [Executioner]
   solve_type = Newton
   type = Transient
-  line_search = bt
+  #line_search = bt
 
-  dt = 1E12
-  end_time = 1E14
+  dt = 1E11
+  end_time = 1E13
 
   l_tol = 1E-5
   nl_abs_tol = 1E-4
@@ -369,7 +236,7 @@
 
 
 [Outputs]
-  file_base = Convection01
+  file_base = ActionConvection01
   exodus = true
   csv = true
   execute_on = 'initial timestep_end'
