@@ -52,11 +52,11 @@
   [../]
   [./temp]
     [./InitialCondition]
-      #type = FunctionIC
-      #function = ini_temp
-      type = RandomIC
-      min = 44
-      max = 46
+      type = FunctionIC
+      function = ini_temp_perturb
+      #type = RandomIC
+      #min = 44
+      #max = 46
       #type = BoundingBoxIC
       #inside = 35
       #outside = 30
@@ -82,6 +82,12 @@
     vars = 't_0 t_grad'
     vals = '30 -3e-2' # temperature at top, temperature gradient
     value = 't_0+t_grad*z'
+  [../]
+  [./ini_temp_perturb]
+    type = ParsedFunction
+    vars = 't_0 t_grad'
+    vals = '30 -3e-2' # temperature at top, temperature gradient
+    value = 't_0+t_grad*z+sin(x/10)'
   [../]
 []
 
