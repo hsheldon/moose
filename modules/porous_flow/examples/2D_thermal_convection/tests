@@ -1,0 +1,56 @@
+[Tests]
+  design = 'kt_2Dconvection.md'
+  issues = '#12916'
+  [./convect_2D_only_run]
+    type = RunApp
+    input = 'convect_2D.i'
+    check_input = True
+    requirement = "PorousFlow shall accept input for free thermal convection "
+                  "in 2D with no stabilisation."
+  [../]
+  [./convect_2D_upwind_only_run]
+    type = RunApp
+    input = 'convect_2D_upwind.i'
+    check_input = True
+    requirement = "PorousFlow shall accept input for free thermal convection "
+                  "in 2D with upwinding."
+  [../]
+  [./convect_2D_KT_only_run]
+    type = RunApp
+    input = 'convect_2D_KT.i'
+    check_input = True
+    requirement = "PorousFlow shall accept input for free thermal convection "
+                  "in 2D with KT stabilisation."
+  [../]
+  [./convect_2D_csv]
+    type = 'CSVDiff'
+    input = 'convect_2D.i'
+    cli_args = 'Executioner/end_time=4E11 Outputs/exodus=false'
+    csvdiff = 'convect_2D_4E11.csv'
+    heavy = true
+    requirement = "PorousFlow shall simulate free thermal convection in 2D "
+                  "without stabilisation. The result will display spatial "
+                  "instability of the temperature field."
+  [../]
+  [./convect_2D_upwind_csv]
+    type = 'CSVDiff'
+    input = 'convect_2D_upwind.i'
+    cli_args = 'Executioner/end_time=4E11 Outputs/exodus=false'
+    csvdiff = 'convect_2D_upwind_4E11.csv'
+    heavy = true
+    requirement = "PorousFlow shall simulate free thermal convection in 2D "
+                  "with upwinding. The result will not display spatial "
+                  "instability of the temperature field, but there will be "
+                  "numerical diffusion of the temperature field."
+  [../]
+  [./convect_2D_KT_csv]
+    type = 'CSVDiff'
+    input = 'convect_2D_KT.i'
+    cli_args = 'Executioner/end_time=4E11 Outputs/exodus=false'
+    csvdiff = 'convect_2D_KT_superbee_4E11.csv'
+    heavy = true
+    requirement = "PorousFlow shall simulate free thermal convection in 2D "
+                  "with KT stabilisation. There will be no spatial instability "
+                  "and negligible numerical diffusion of the temperature field."
+  [../]
+[]
