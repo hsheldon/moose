@@ -75,6 +75,7 @@ Details about numerical issues.
 - [Numerical stabilization: Kuzmin-Turek](kt.md)
 - [Numerical stabilization: numerical diffusion](numerical_diffusion.md)
 - [Numerical stabilization: A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+- [Numerical stabilization: 2D thermal convection with Kuzmin-Turek stabilization](kt_2Dconvection.md)
 - [Preconditioning and solvers](solvers.md)
 - [Convergence criteria](convergence.md)
 - [Nonlinear convergence problems](nonlinear_convergence_problems.md)
